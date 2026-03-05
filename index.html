@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Master Study Plan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --es: #c0392b; --es-accent: #e74c3c; --es-bg: #fff5f5;
+      --it: #1a6b3c; --it-accent: #27ae60; --it-bg: #f0fff6;
+      --lsat: #1a3a6b; --lsat-accent: #2563eb; --lsat-bg: #f0f4ff;
+      --chess: #5b3a8c; --chess-accent: #7c3aed; --chess-bg: #f5f0ff;
+      --loop: #92400e; --loop-accent: #d97706; --loop-bg: #fffbeb;
+      --dark: #1a1a1a; --mid: #555; --light: #888; --border: #eee; --page: #faf8f4;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--page); min-height: 100vh; padding: 40px 16px 60px; color: var(--dark); }
+    .container { max-width: 820px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 28px; animation: fadeUp 0.5s ease both; }
+    .header .eyebrow { font-size: 11px; letter-spacing: 4px; color: var(--light); text-transform: uppercase; margin-bottom: 10px; }
+    .header h1 { font-family: 'Lora', serif; font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+    .header p { color: var(--light); font-size: 13.5px; margin-top: 8px; font-style: italic; font-family: 'Lora', serif; }
+
+    /* Phase switcher */
+    .phase-switcher { display: flex; gap: 0; justify-content: center; margin-bottom: 20px; animation: fadeUp 0.5s 0.05s ease both; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); max-width: 480px; margin-left: auto; margin-right: auto; }
+    .phase-btn { flex: 1; padding: 10px 16px; background: #fff; border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--mid); cursor: pointer; transition: all 0.18s; line-height: 1.3; text-align: center; }
+    .phase-btn:first-child { border-right: 2px solid var(--border); }
+    .phase-btn.active { background: var(--lsat-accent); color: #fff; font-weight: 700; }
+    .phase-btn .phase-label { font-size: 10px; opacity: 0.75; display: block; }
+
+    /* Loophole tracker */
+    .loophole-tracker { background: var(--loop-bg); border: 1.5px solid rgba(217,119,6,0.3); border-radius: 16px; padding: 18px 20px; margin-bottom: 20px; animation: fadeUp 0.4s 0.07s ease both; }
+    .loop-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .loop-title { font-size: 13px; font-weight: 700; color: var(--loop); letter-spacing: 0.2px; }
+    .loop-subtitle { font-size: 11px; color: var(--loop-accent); font-style: italic; }
+    .loop-chapters { display: flex; gap: 5px; flex-wrap: wrap; }
+    .loop-ch { border-radius: 8px; padding: 6px 10px; font-size: 11px; font-weight: 700; text-align: center; cursor: pointer; transition: all 0.15s; border: 1.5px solid transparent; min-width: 44px; }
+    .loop-ch.done { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+    .loop-ch.current { background: var(--loop-accent); color: #fff; border-color: var(--loop-accent); box-shadow: 0 3px 10px rgba(217,119,6,0.35); }
+    .loop-ch.upcoming { background: #fff; color: #aaa; border-color: #eee; }
+    .loop-detail { margin-top: 12px; background: #fff; border-radius: 10px; padding: 11px 14px; border-left: 4px solid var(--loop-accent); }
+    .loop-detail-title { font-size: 12.5px; font-weight: 700; color: var(--loop); margin-bottom: 3px; }
+    .loop-detail-text { font-size: 12px; color: var(--mid); line-height: 1.55; }
+    .loop-7sage-link { display: inline-block; margin-top: 5px; font-size: 11px; color: var(--lsat-accent); font-weight: 600; }
+
+    /* Timeline banner */
+    .timeline-banner { border-radius: 12px; padding: 13px 17px; margin-bottom: 20px; font-size: 12.5px; line-height: 1.6; animation: fadeUp 0.4s ease both; }
+    .timeline-banner.phase1 { background: #e8f0fe; border: 1.5px solid rgba(37,99,235,0.2); color: #1a3a6b; }
+    .timeline-banner.phase2 { background: #fef3e8; border: 1.5px solid rgba(234,88,12,0.2); color: #7c2d12; }
+
+    /* Legend */
+    .legend { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; animation: fadeUp 0.5s 0.1s ease both; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--mid); font-weight: 500; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Day tabs */
+    .tabs { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; animation: fadeUp 0.5s 0.1s ease both; }
+    .tab { padding: 7px 14px; border-radius: 40px; border: 2px solid var(--border); background: #fff; color: var(--mid); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.18s ease; }
+    .tab.active { color: #fff; font-weight: 700; border-color: transparent; }
+    .tab.active.c-mon, .tab.active.c-wed, .tab.active.c-fri { background: var(--lsat-accent); box-shadow: 0 3px 12px rgba(37,99,235,0.3); }
+    .tab.active.c-tue { background: var(--es-accent); box-shadow: 0 3px 12px rgba(231,76,60,0.3); }
+    .tab.active.c-thu { background: var(--it-accent); box-shadow: 0 3px 12px rgba(39,174,96,0.3); }
+    .tab.active.c-sat, .tab.active.c-sun { background: var(--chess-accent); box-shadow: 0 3px 12px rgba(124,58,237,0.3); }
+
+    .day-panel { display: none; animation: fadeUp 0.3s ease both; }
+    .day-panel.active { display: block; }
+    .phase-content { display: none; }
+    .phase-content.active { display: block; }
+
+    .section { border-radius: 16px; padding: 20px; margin-bottom: 12px; border: 1.5px solid transparent; }
+    .section.lsat  { background: var(--lsat-bg);  border-color: rgba(37,99,235,0.2);  box-shadow: 0 5px 18px rgba(37,99,235,0.07); }
+    .section.es    { background: var(--es-bg);    border-color: rgba(231,76,60,0.2);  box-shadow: 0 5px 18px rgba(231,76,60,0.07); }
+    .section.it    { background: var(--it-bg);    border-color: rgba(39,174,96,0.2);  box-shadow: 0 5px 18px rgba(39,174,96,0.07); }
+    .section.chess { background: var(--chess-bg); border-color: rgba(124,58,237,0.2); box-shadow: 0 5px 18px rgba(124,58,237,0.07); }
+
+    .section-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .section-title { font-family: 'Lora', serif; font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .lsat .section-title { color: var(--lsat); } .es .section-title { color: var(--es); } .it .section-title { color: var(--it); } .chess .section-title { color: var(--chess); }
+    .badge { display: inline-block; border-radius: 20px; padding: 3px 11px; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; color: #fff; }
+    .lsat .badge { background: var(--lsat-accent); } .es .badge { background: var(--es-accent); } .it .badge { background: var(--it-accent); } .chess .badge { background: var(--chess-accent); }
+    .duration { font-size: 12px; color: var(--light); font-style: italic; white-space: nowrap; }
+
+    .blocks { display: flex; flex-direction: column; gap: 8px; }
+    .block { display: flex; gap: 11px; align-items: flex-start; background: #fff; border-radius: 10px; padding: 11px 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .lsat .block { border-left: 4px solid var(--lsat-accent); } .es .block { border-left: 4px solid var(--es-accent); } .it .block { border-left: 4px solid var(--it-accent); } .chess .block { border-left: 4px solid var(--chess-accent); }
+    .block-icon { font-size: 16px; min-width: 21px; text-align: center; padding-top: 1px; flex-shrink: 0; }
+    .block-body { flex: 1; }
+    .block-top { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px; margin-bottom: 3px; }
+    .block-title { font-weight: 700; font-size: 13px; }
+    .block-time { font-size: 10.5px; font-weight: 600; border-radius: 20px; padding: 2px 8px; white-space: nowrap; }
+    .lsat .block-time { color: var(--lsat-accent); background: rgba(37,99,235,0.1); } .es .block-time { color: var(--es-accent); background: rgba(231,76,60,0.1); } .it .block-time { color: var(--it-accent); background: rgba(39,174,96,0.1); } .chess .block-time { color: var(--chess-accent); background: rgba(124,58,237,0.1); }
+    .block-detail { font-size: 12px; color: var(--mid); line-height: 1.55; }
+
+    /* Loophole block inside LSAT section */
+    .loop-block { background: var(--loop-bg); border-radius: 10px; padding: 11px 13px; border-left: 4px solid var(--loop-accent); display: flex; gap: 11px; align-items: flex-start; }
+    .loop-block .block-title { color: var(--loop); }
+    .loop-block .block-time { color: var(--loop-accent); background: rgba(217,119,6,0.1); }
+    .loop-block .block-detail { color: var(--loop); opacity: 0.8; }
+
+    .sage-note { background: rgba(37,99,235,0.07); border: 1px solid rgba(37,99,235,0.18); border-radius: 8px; padding: 8px 12px; margin-top: 8px; font-size: 11.5px; color: var(--lsat); line-height: 1.5; }
+    .sage-note strong { font-weight: 700; }
+
+    /* Milestone bar */
+    .milestone-bar { background: #fff; border-radius: 14px; border: 1.5px solid var(--border); padding: 18px 20px; margin-bottom: 14px; animation: fadeUp 0.5s 0.15s ease both; }
+    .section-label { font-size: 10px; letter-spacing: 3px; color: #aaa; text-transform: uppercase; margin-bottom: 12px; }
+    .milestones { display: flex; flex-direction: column; gap: 7px; }
+    .milestone { display: flex; align-items: flex-start; gap: 12px; }
+    .m-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+    .m-now { background: #22c55e; } .m-loop { background: var(--loop-accent); } .m-phase2 { background: var(--lsat-accent); } .m-pt { background: #ea580c; } .m-test { background: #dc2626; }
+    .m-text { font-size: 12px; color: var(--mid); line-height: 1.4; }
+    .m-text strong { color: var(--dark); font-weight: 700; }
+    .m-line { width: 2px; height: 12px; background: var(--border); margin-left: 4px; }
+
+    /* Rhythm */
+    .rhythm-card { background: #fff; border-radius: 14px; border: 1.5px solid var(--border); padding: 18px 20px; margin-bottom: 14px; animation: fadeUp 0.5s 0.2s ease both; }
+    .rhythm-grid { display: flex; gap: 5px; flex-wrap: wrap; }
+    .rhythm-day { text-align: center; flex: 1 0 auto; min-width: 44px; }
+    .r-label { font-size: 10px; color: var(--light); margin-bottom: 4px; }
+    .r-pills { display: flex; flex-direction: column; gap: 3px; }
+    .r-pill { border-radius: 6px; padding: 4px 2px; font-weight: 700; font-size: 10px; color: #fff; text-align: center; }
+    .pill-lsat { background: var(--lsat-accent); } .pill-es { background: var(--es-accent); } .pill-it { background: var(--it-accent); } .pill-chess { background: var(--chess-accent); }
+    .pill-loop { background: var(--loop-accent); } .pill-pt { background: #ea580c; } .pill-rest { background: #ddd; color: #999; }
+    .rhythm-note { color: var(--light); font-size: 11.5px; margin-top: 10px; font-style: italic; line-height: 1.5; }
+
+    /* Tips */
+    .tips-card { background: var(--dark); border-radius: 14px; padding: 20px 22px; animation: fadeUp 0.5s 0.3s ease both; }
+    .tips-card .section-label { color: #555; }
+    .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
+    @media (max-width: 520px) { .tips-grid { grid-template-columns: 1fr; } }
+    .tip-group-label { font-size: 10px; letter-spacing: 2px; color: #555; text-transform: uppercase; margin-bottom: 7px; font-weight: 700; }
+    .tip { display: flex; gap: 9px; align-items: flex-start; margin-bottom: 7px; }
+    .tip-icon { font-size: 13px; padding-top: 2px; flex-shrink: 0; }
+    .tip-text { color: #bbb; font-size: 12px; line-height: 1.55; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="eyebrow">Master Study Plan</div>
+    <h1>Languages · LSAT · Chess</h1>
+    <p>Free after 2 pm weekdays · 154 → 172+ · August 2026 LSAT</p>
+  </div>
+
+  <!-- Phase Switcher -->
+  <div class="phase-switcher">
+    <button class="phase-btn active" id="btnPhase1" onclick="switchPhase(1)">
+      <span class="phase-label">Now → Apr 5</span>
+      Phase 1: Foundations
+    </button>
+    <button class="phase-btn" id="btnPhase2" onclick="switchPhase(2)">
+      <span class="phase-label">Apr 6 → Aug test</span>
+      Phase 2: Practice
+    </button>
+  </div>
+
+  <!-- Loophole Chapter Tracker -->
+  <div class="loophole-tracker">
+    <div class="loop-header">
+      <div>
+        <div class="loop-title">📙 LSAT Loophole — Chapter Tracker</div>
+        <div class="loop-subtitle">Ch. 6–12 · Click any chapter to see details + 7Sage alignment</div>
+      </div>
+    </div>
+    <div class="loop-chapters">
+      <div class="loop-ch done"    onclick="showLoop(1)"  id="lch1">Ch.1</div>
+      <div class="loop-ch done"    onclick="showLoop(2)"  id="lch2">Ch.2</div>
+      <div class="loop-ch done"    onclick="showLoop(3)"  id="lch3">Ch.3</div>
+      <div class="loop-ch done"    onclick="showLoop(4)"  id="lch4">Ch.4</div>
+      <div class="loop-ch done"    onclick="showLoop(5)"  id="lch5">Ch.5</div>
+      <div class="loop-ch current" onclick="showLoop(6)"  id="lch6">Ch.6 ←</div>
+      <div class="loop-ch upcoming"onclick="showLoop(7)"  id="lch7">Ch.7</div>
+      <div class="loop-ch upcoming"onclick="showLoop(8)"  id="lch8">Ch.8</div>
+      <div class="loop-ch upcoming"onclick="showLoop(9)"  id="lch9">Ch.9</div>
+      <div class="loop-ch upcoming"onclick="showLoop(10)" id="lch10">Ch.10</div>
+      <div class="loop-ch upcoming"onclick="showLoop(11)" id="lch11">Ch.11</div>
+      <div class="loop-ch upcoming"onclick="showLoop(12)" id="lch12">Ch.12</div>
+    </div>
+    <div class="loop-detail" id="loopDetail">
+      <div class="loop-detail-title" id="loopTitle">Ch. 6 — Either/Or, Unless/Until/Except, Complex Conditional Chains</div>
+      <div class="loop-detail-text" id="loopText">You're here now. This chapter extends conditional logic into the harder indicator words the LSAT loves to hide (unless, until, except, only if, neither/nor). Master these translations cold — they appear in SA, NA, Flaw, and Weaken questions constantly. Complete all exercises in the chapter before moving on.</div>
+      <div class="loop-7sage-link" id="loopLink">🔗 7Sage alignment: Wk 2 (Quantifiers/Sets) → Wk 3 (MBT, SA) — Ch. 6 primes your conditional reasoning for these question types</div>
+    </div>
+  </div>
+
+  <!-- Banners -->
+  <div class="timeline-banner phase1" id="banner1">
+    <strong>📖 Phase 1: Foundations — You Are Here (Week 2)</strong><br>
+    Follow 7Sage's daily lesson plan exactly. Your job is deep understanding, not speed. Loophole chapters run parallel — finish Ch. 6 this week, Ch. 7 next week, working through to Ch. 12 by ~Apr 5. The two resources reinforce each other chapter by chapter.
+  </div>
+  <div class="timeline-banner phase2" id="banner2" style="display:none">
+    <strong>🎯 Phase 2: Practice Blocks — Apr 6 onwards</strong><br>
+    7Sage now drives your daily content via assigned drill blocks and weekly PTs every Sunday. Loophole Ch. 12 should be complete by the time you enter Phase 2 — use it as a reference during error log review, not new reading.
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--lsat-accent)"></div>LSAT / 7Sage</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--loop-accent)"></div>Loophole</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--es-accent)"></div>Spanish (A2)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--it-accent)"></div>Italian (A1)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--chess-accent)"></div>Chess</div>
+  </div>
+
+  <!-- Day Tabs -->
+  <div class="tabs">
+    <button class="tab active c-mon" onclick="showDay('mon')">Monday</button>
+    <button class="tab c-tue"        onclick="showDay('tue')">Tuesday</button>
+    <button class="tab c-wed"        onclick="showDay('wed')">Wednesday</button>
+    <button class="tab c-thu"        onclick="showDay('thu')">Thursday</button>
+    <button class="tab c-fri"        onclick="showDay('fri')">Friday</button>
+    <button class="tab c-sat"        onclick="showDay('sat')">Saturday</button>
+    <button class="tab c-sun"        onclick="showDay('sun')">Sunday</button>
+  </div>
+
+  <!-- ======= MONDAY ======= -->
+  <div id="mon" class="day-panel active">
+    <div class="phase-content active" data-phase="1">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — 7Sage Foundations</div><span class="badge">Core Curriculum · LR</span></div>
+          <div class="duration">2.5 hrs · 2:00–4:30 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage Lessons (Today's Assignment)</span><span class="block-time">2:00–3:00</span></div><div class="block-detail">Watch today's assigned 7Sage videos at full attention. Pause and re-watch anything unclear. Take brief notes on the core concept in your own words — not verbatim.</div></div></div>
+          <div class="block"><div class="block-icon">✏️</div><div class="block-body"><div class="block-top"><span class="block-title">YOU TRY Questions</span><span class="block-time">3:00–3:45</span></div><div class="block-detail">Work all YOU TRY questions untimed. For every wrong answer: write out why the correct answer is correct before watching the explanation. This forces real understanding.</div></div></div>
+          <div class="block"><div class="block-icon">📓</div><div class="block-body"><div class="block-top"><span class="block-title">Error Log — All Misses</span><span class="block-time">3:45–4:00</span></div><div class="block-detail">Log every miss now, even in Foundations. Question type + what fooled you + correct reasoning. Building this habit in Week 2 is one of the highest-ROI moves you can make.</div></div></div>
+          <div class="loop-block"><div class="block-icon">📙</div><div class="block-body"><div class="block-top"><span class="block-title">Loophole Reading — Daily Chapter Progress</span><span class="block-time">4:00–4:30</span></div><div class="block-detail">Read the next section of your current Loophole chapter. <strong>This week: finish Ch. 6</strong> (Either/Or, Unless/Until/Except). Complete all drills in the chapter — don't skip them. The Loophole drills are distinct from 7Sage and build translation speed independently.</div></div></div>
+        </div>
+        <div class="sage-note"><strong>Wk 2 — Loophole Ch. 6 sync:</strong> "Unless" = "if not." "Only if" = sufficient/necessary flip. These show up disguised in SA and NA question stems — exactly what 7Sage covers in Wks 3–4. Mastering Ch. 6 now gives you a huge head start.</div>
+      </div>
+      <div class="section es">
+        <div class="section-header">
+          <div><div class="section-title">🇪🇸 Spanish</div><span class="badge">A2 · Listening + Vocabulary</span></div>
+          <div class="duration">1 hr · 4:45–5:45 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">Lingopie</span><span class="block-time">4:45–5:05</span></div><div class="block-detail">Watch 1–2 episodes with Spanish subtitles. Pause & repeat key phrases aloud.</div></div></div>
+          <div class="block"><div class="block-icon">📖</div><div class="block-body"><div class="block-top"><span class="block-title">Quizlet + New Words</span><span class="block-time">5:05–5:22</span></div><div class="block-detail">Review deck + add 8–10 new words from today's episode.</div></div></div>
+          <div class="block"><div class="block-icon">✍️</div><div class="block-body"><div class="block-top"><span class="block-title">Writing Practice</span><span class="block-time">5:22–5:45</span></div><div class="block-detail">Write 6–8 sentences using new vocab. Read them aloud when done.</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phase-content" data-phase="2">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — Practice</div><span class="badge">7Sage Drills · LR Day</span></div>
+          <div class="duration">2 hrs · 2:00–4:00 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">🧠</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage Assigned LR Drills</span><span class="block-time">2:00–3:20</span></div><div class="block-detail">Complete today's assigned drill blocks exactly as prescribed (Tutor's Pick Circuit, Power 5, LR Priority, etc.) Follow all assigned time limits — pacing is now part of the work.</div></div></div>
+          <div class="block"><div class="block-icon">📓</div><div class="block-body"><div class="block-top"><span class="block-title">Error Log — All Misses</span><span class="block-time">3:20–4:00</span></div><div class="block-detail">Every miss logged: question type, what fooled you, correct reasoning, Loophole chapter reference if relevant. This 40 minutes is where 154→172 actually happens.</div></div></div>
+        </div>
+        <div class="sage-note"><strong>Phase 2:</strong> When you miss a question tied to a flaw type or conditional pattern, pull your Loophole notes for that chapter and re-read the relevant section. The book is now a reference, not new reading.</div>
+      </div>
+      <div class="section es">
+        <div class="section-header">
+          <div><div class="section-title">🇪🇸 Spanish</div><span class="badge">A2 · Listening + Vocabulary</span></div>
+          <div class="duration">1 hr · 4:15–5:15 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">Lingopie + Quizlet + Writing</span><span class="block-time">4:15–5:15</span></div><div class="block-detail">20 min Lingopie → 15 min Quizlet → 25 min writing practice. Same routine, every Monday.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= TUESDAY ======= -->
+  <div id="tue" class="day-panel">
+    <div class="phase-content active" data-phase="1">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — 7Sage Foundations</div><span class="badge">Core Curriculum · YOU TRY Heavy</span></div>
+          <div class="duration">2.5 hrs · 2:00–4:30 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage Lessons + YOU TRY</span><span class="block-time">2:00–3:45</span></div><div class="block-detail">Tuesday is often YOU TRY-heavy (RRE, WSE Causal, NA). Go slowly. For each YOU TRY question: attempt it, then watch the full explanation — even for correct answers. "Why is this right?" is as important as "why was I wrong?"</div></div></div>
+          <div class="block"><div class="block-icon">📓</div><div class="block-body"><div class="block-top"><span class="block-title">Error Log</span><span class="block-time">3:45–4:00</span></div><div class="block-detail">Log all misses. Note if any connect to Loophole flaw types — flag for Thursday review.</div></div></div>
+          <div class="loop-block"><div class="block-icon">📙</div><div class="block-body"><div class="block-top"><span class="block-title">Loophole — Next Chapter Section</span><span class="block-time">4:00–4:30</span></div><div class="block-detail"><strong>Wk 2:</strong> Continue/finish Ch. 6. <strong>Wk 3:</strong> Start Ch. 7 (Classic Flaws — False Dichotomy, Straw Man, Circular Reasoning, Equivocation, Appeal Fallacies). Ch. 7 maps directly to 7Sage's Flaw lessons in Wk 4–5 — reading it a week early is a major advantage.</div></div></div>
+        </div>
+        <div class="sage-note"><strong>Wk 3 Loophole Ch. 7 preview:</strong> The 7Sage Flaw lessons (starting Wk 4) will name these same flaws using slightly different language. Your Loophole Ch. 7 knowledge means you'll already know the pattern — 7Sage just deepens it with more question examples.</div>
+      </div>
+      <div class="section es">
+        <div class="section-header">
+          <div><div class="section-title">🇪🇸 Spanish</div><span class="badge">A2 · Grammar + Output</span></div>
+          <div class="duration">1 hr · 4:45–5:45 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📘</div><div class="block-body"><div class="block-top"><span class="block-title">Grammar Focus</span><span class="block-time">4:45–5:05</span></div><div class="block-detail">One point this week (e.g. ser/estar). Write 8 example sentences that test the distinction.</div></div></div>
+          <div class="block"><div class="block-icon">📚</div><div class="block-body"><div class="block-top"><span class="block-title">Graded Reader Aloud</span><span class="block-time">5:05–5:25</span></div><div class="block-detail">Read current A2 story aloud. Guess unknown words from context before looking up.</div></div></div>
+          <div class="block"><div class="block-icon">🔊</div><div class="block-body"><div class="block-top"><span class="block-title">Speak + Record</span><span class="block-time">5:25–5:45</span></div><div class="block-detail">Write a short paragraph in Spanish. Read it aloud — record yourself once a week.</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phase-content" data-phase="2">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — Practice</div><span class="badge">7Sage Drills · RC Day</span></div>
+          <div class="duration">2 hrs · 2:00–4:00 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📄</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage RC Drills</span><span class="block-time">2:00–3:15</span></div><div class="block-detail">Complete assigned RC passages. Map every passage — main point, author stance, paragraph roles — before reading a single question. No exceptions, even under time pressure.</div></div></div>
+          <div class="block"><div class="block-icon">🔍</div><div class="block-body"><div class="block-top"><span class="block-title">Review + Error Log</span><span class="block-time">3:15–4:00</span></div><div class="block-detail">Watch 7Sage video explanations for all RC misses. Focus on how your passage map differed — that's almost always the root cause of RC errors.</div></div></div>
+        </div>
+      </div>
+      <div class="section es">
+        <div class="section-header">
+          <div><div class="section-title">🇪🇸 Spanish</div><span class="badge">A2 · Grammar + Output</span></div>
+          <div class="duration">1 hr · 4:15–5:15 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📘</div><div class="block-body"><div class="block-top"><span class="block-title">Grammar + Reader + Speaking</span><span class="block-time">4:15–5:15</span></div><div class="block-detail">20 min grammar focus → 20 min graded reader aloud → 20 min write + speak paragraph.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= WEDNESDAY ======= -->
+  <div id="wed" class="day-panel">
+    <div class="phase-content active" data-phase="1">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — 7Sage Foundations</div><span class="badge">Core Curriculum · Deep Work</span></div>
+          <div class="duration">2.5 hrs · 2:00–4:30 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage Lessons + YOU TRY</span><span class="block-time">2:00–3:40</span></div><div class="block-detail">Complete today's assigned content. Weds in Wks 3–5 often covers WSE Causal (the hardest LR type) and early Flaw. Slow down on causal reasoning — it's the single most-tested pattern on the LSAT.</div></div></div>
+          <div class="block"><div class="block-icon">📓</div><div class="block-body"><div class="block-top"><span class="block-title">Concept Summary + Error Log</span><span class="block-time">3:40–4:00</span></div><div class="block-detail">Write a 3-sentence summary of today's core concept in your own words. Log all misses. If you can't summarize it simply, re-watch the key lesson.</div></div></div>
+          <div class="loop-block"><div class="block-icon">📙</div><div class="block-body"><div class="block-top"><span class="block-title">Loophole — Chapter Progress</span><span class="block-time">4:00–4:30</span></div><div class="block-detail"><strong>Wk 3:</strong> Ch. 7 (Classic Flaws). <strong>Wk 4:</strong> Ch. 8 (Causal Reasoning Flaws — correlation ≠ causation, biased samples, survey problems, comparison group errors). Ch. 8 is the Loophole companion to 7Sage's entire WSE Causal block. Read it the same week 7Sage teaches WSE Causal for maximum reinforcement.</div></div></div>
+        </div>
+        <div class="sage-note"><strong>Ch. 8 power move:</strong> When 7Sage shows you a causal argument, you'll already have Cassidy's framework for attacking it. Ch. 8's "What if" questions (biased sample? confounding variable? reverse causation?) are exactly the alternative hypotheses 7Sage drills in WSE Causal lessons.</div>
+      </div>
+      <div class="section it">
+        <div class="section-header">
+          <div><div class="section-title">🇮🇹 Italian</div><span class="badge">A1 · Grammar + Vocabulary</span></div>
+          <div class="duration">1 hr · 4:45–5:45 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📝</div><div class="block-body"><div class="block-top"><span class="block-title">Quizlet Drill</span><span class="block-time">4:45–5:00</span></div><div class="block-detail">A1 vocab — 15–20 words. Focus on noun gender (il/la) and basic verb conjugations.</div></div></div>
+          <div class="block"><div class="block-icon">📘</div><div class="block-body"><div class="block-top"><span class="block-title">Grammar Focus</span><span class="block-time">5:00–5:20</span></div><div class="block-detail">One grammar point (e.g. presente tense -are/-ere/-ire). Write 6 example sentences aloud.</div></div></div>
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">Lingopie / A1 Video</span><span class="block-time">5:20–5:45</span></div><div class="block-detail">Watch slow A1 Italian content. Repeat full phrases aloud. Note 5 new words.</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phase-content" data-phase="2">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — Practice</div><span class="badge">7Sage Drills · LR Day</span></div>
+          <div class="duration">2 hrs · 2:00–4:00 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">🧠</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage LR Drills + Timed Section</span><span class="block-time">2:00–3:20</span></div><div class="block-detail">Complete assigned drills. Weds often has a timed LR section — full simulation, no pausing. This is the day to stress-test your pacing.</div></div></div>
+          <div class="block"><div class="block-icon">📓</div><div class="block-body"><div class="block-top"><span class="block-title">Weekly Error Pattern Check</span><span class="block-time">3:20–4:00</span></div><div class="block-detail">Look across Mon–Wed errors. What question types keep appearing? That's your Thursday focus. Reference your Loophole notes for any flaw or conditional patterns you keep missing.</div></div></div>
+        </div>
+      </div>
+      <div class="section it">
+        <div class="section-header">
+          <div><div class="section-title">🇮🇹 Italian</div><span class="badge">A1 · Grammar + Vocabulary</span></div>
+          <div class="duration">1 hr · 4:15–5:15 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📝</div><div class="block-body"><div class="block-top"><span class="block-title">Quizlet + Grammar + Lingopie</span><span class="block-time">4:15–5:15</span></div><div class="block-detail">15 min vocab → 20 min grammar with sentences → 25 min Italian video with phrase repetition.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= THURSDAY ======= -->
+  <div id="thu" class="day-panel">
+    <div class="phase-content active" data-phase="1">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — 7Sage Foundations</div><span class="badge">Core Curriculum · YOU TRY + Review</span></div>
+          <div class="duration">2.5 hrs · 2:00–4:30 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">✏️</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage YOU TRY Questions</span><span class="block-time">2:00–3:15</span></div><div class="block-detail">Thursday tends to be YOU TRY-heavy (NA, AP, Flaw deep dives). Untimed. For each one: attempt blind, then watch the full 7Sage explanation, then write your own summary of why the right answer is right.</div></div></div>
+          <div class="block"><div class="block-icon">🔍</div><div class="block-body"><div class="block-top"><span class="block-title">Video Review for Misses</span><span class="block-time">3:15–3:50</span></div><div class="block-detail">Watch 7Sage explanations for every miss and every guess. Add all to error log.</div></div></div>
+          <div class="block"><div class="block-icon">📓</div><div class="block-body"><div class="block-top"><span class="block-title">Error Log + Loophole Cross-Reference</span><span class="block-time">3:50–4:00</span></div><div class="block-detail">For each logged miss, note which Loophole chapter it relates to. Flag it for Saturday re-read.</div></div></div>
+          <div class="loop-block"><div class="block-icon">📙</div><div class="block-body"><div class="block-top"><span class="block-title">Loophole — Chapter Progress</span><span class="block-time">4:00–4:30</span></div><div class="block-detail"><strong>Wk 3:</strong> Continue Ch. 7 or start Ch. 8. <strong>Wk 4:</strong> Ch. 9 — the CLIR method and Powerful vs. Provable spectrum. Ch. 9 is arguably the most important chapter for answer choice elimination speed. Read it carefully and re-do its drills.</div></div></div>
+        </div>
+        <div class="sage-note"><strong>Ch. 9 CLIR method:</strong> Classify stimulus → Locate loophole/inference → Identify question type → Respond. Once this is automatic, your answer prediction speed doubles. 7Sage teaches this implicitly; Loophole makes it explicit.</div>
+      </div>
+      <div class="section it">
+        <div class="section-header">
+          <div><div class="section-title">🇮🇹 Italian</div><span class="badge">A1 · Listening + Speaking</span></div>
+          <div class="duration">1 hr · 4:45–5:45 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">Lingopie / Coffee Break Italian</span><span class="block-time">4:45–5:10</span></div><div class="block-detail">Watch A1 Italian content or Coffee Break Italian A1. Repeat full sentences back aloud after hearing them.</div></div></div>
+          <div class="block"><div class="block-icon">📖</div><div class="block-body"><div class="block-top"><span class="block-title">Graded Reader Aloud</span><span class="block-time">5:10–5:25</span></div><div class="block-detail">2–3 pages of A1 Italian story aloud. Focus on Italian rhythm and vowel sounds.</div></div></div>
+          <div class="block"><div class="block-icon">✍️</div><div class="block-body"><div class="block-top"><span class="block-title">Writing + Quizlet</span><span class="block-time">5:25–5:45</span></div><div class="block-detail">6–8 Italian sentences about your routine. Close with 5-min Quizlet review.</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phase-content" data-phase="2">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — Practice</div><span class="badge">7Sage Drills · RC Day</span></div>
+          <div class="duration">2 hrs · 2:00–4:00 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📄</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage RC Drills + Section</span><span class="block-time">2:00–3:15</span></div><div class="block-detail">Complete assigned RC drills. Low-res summary on every single passage — write it before the questions. Every time.</div></div></div>
+          <div class="block"><div class="block-icon">📓</div><div class="block-body"><div class="block-top"><span class="block-title">Error Log + Week Pattern Review</span><span class="block-time">3:15–4:00</span></div><div class="block-detail">Full RC error log. Then scan full week's errors for patterns. Bring a clear focus to Sunday PT review.</div></div></div>
+        </div>
+      </div>
+      <div class="section it">
+        <div class="section-header">
+          <div><div class="section-title">🇮🇹 Italian</div><span class="badge">A1 · Listening + Speaking</span></div>
+          <div class="duration">1 hr · 4:15–5:15 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">Lingopie + Reader + Writing</span><span class="block-time">4:15–5:15</span></div><div class="block-detail">25 min Italian listening/video → 15 min reader aloud → 20 min writing + Quizlet close.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= FRIDAY ======= -->
+  <div id="fri" class="day-panel">
+    <div class="phase-content active" data-phase="1">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — 7Sage Foundations</div><span class="badge">Drill Day + Weekly Reflection</span></div>
+          <div class="duration">2.5 hrs · 2:00–4:30 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">🎯</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage Official DRILL Assignment</span><span class="block-time">2:00–2:35</span></div><div class="block-detail">Friday often has official DRILL sets (MBT, RRE, WSE, Flaw, Parallel). Follow the time allotment — mild timing pressure starts here. These are real LSAT questions under a gentle clock.</div></div></div>
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">Remaining Friday Lessons</span><span class="block-time">2:35–3:20</span></div><div class="block-detail">Complete all remaining assigned content. Fridays in Wks 4–5 can spill into WSE Non-Causal, Flaw deep dives, or Parallel questions — work through all of it.</div></div></div>
+          <div class="block"><div class="block-icon">🔁</div><div class="block-body"><div class="block-top"><span class="block-title">Weekly Reflection</span><span class="block-time">3:20–3:45</span></div><div class="block-detail">Review full week error log. Write: (1) what clicked, (2) what didn't, (3) which Loophole chapter to review this weekend. This 25-min investment prevents unfocused Saturday studying.</div></div></div>
+          <div class="loop-block"><div class="block-icon">📙</div><div class="block-body"><div class="block-top"><span class="block-title">Loophole — Weekly Progress Check</span><span class="block-time">3:45–4:30</span></div><div class="block-detail"><strong>Target pace:</strong> 1 Loophole chapter per week, Ch. 6→12 over 7 weeks (done by ~Apr 5). <strong>Wk 4:</strong> Ch. 10 (Question Types: Weaken, Strengthen, NA, SA). <strong>Wk 5:</strong> Ch. 11 (MBT, RRE, Method of Reasoning, Flaw). Complete all chapter drills and flag any concept you're still shaky on.</div></div></div>
+        </div>
+        <div class="sage-note"><strong>Ch. 10–11 alignment:</strong> These Loophole chapters are the most directly question-type-aligned chapters in the book. Reading them as 7Sage covers the same question types (Wks 3–5) creates a powerful dual-reinforcement loop that accelerates pattern recognition dramatically.</div>
+      </div>
+      <div class="section es">
+        <div class="section-header">
+          <div><div class="section-title">🇪🇸 Spanish</div><span class="badge">A2 · Free Practice + Review</span></div>
+          <div class="duration">1 hr · 4:45–5:45 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📖</div><div class="block-body"><div class="block-top"><span class="block-title">Quizlet Full Week Review</span><span class="block-time">4:45–5:00</span></div><div class="block-detail">Review the full week's Spanish vocab. Retire cards you know cold. Flag anything shaky.</div></div></div>
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">Lingopie Rewatch</span><span class="block-time">5:00–5:20</span></div><div class="block-detail">Rewatch a clip from earlier this week. Notice how much more you catch the second time.</div></div></div>
+          <div class="block"><div class="block-icon">✍️</div><div class="block-body"><div class="block-top"><span class="block-title">Free Writing</span><span class="block-time">5:20–5:45</span></div><div class="block-detail">Write freely in Spanish 10–12 min. No self-correcting — just flow. This builds fluency instinct.</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phase-content" data-phase="2">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — Practice</div><span class="badge">Mixed Drills + PT Prep</span></div>
+          <div class="duration">2 hrs · 2:00–4:00 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">🧠</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage Assigned Drills</span><span class="block-time">2:00–3:15</span></div><div class="block-detail">Complete Friday's assigned drill sets. Follow all timing. Friday blocks often mix LR + RC.</div></div></div>
+          <div class="block"><div class="block-icon">🎯</div><div class="block-body"><div class="block-top"><span class="block-title">Weekly Reflection + PT Prep</span><span class="block-time">3:15–4:00</span></div><div class="block-detail">Review full week error log. Write 3 insights. Confirm fresh PT ready for Sunday. Reference Loophole Ch. 7–11 for any flaw/conditional patterns you've been missing this week.</div></div></div>
+        </div>
+      </div>
+      <div class="section es">
+        <div class="section-header">
+          <div><div class="section-title">🇪🇸 Spanish</div><span class="badge">A2 · Free Practice + Review</span></div>
+          <div class="duration">1 hr · 4:15–5:15 pm</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📖</div><div class="block-body"><div class="block-top"><span class="block-title">Quizlet + Rewatch + Free Writing</span><span class="block-time">4:15–5:15</span></div><div class="block-detail">15 min Quizlet review → 20 min Lingopie rewatch → 25 min free Spanish writing.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= SATURDAY ======= -->
+  <div id="sat" class="day-panel">
+    <div class="phase-content active" data-phase="1">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — Foundations</div><span class="badge">7Sage Weekend Content</span></div>
+          <div class="duration">4 hrs · morning</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage Saturday Lessons</span><span class="block-time">First 2 hrs</span></div><div class="block-detail">Complete Saturday-assigned content. Wks 3–6 Saturdays include heavy material: Flaw, Parallel, RC passage styles (Critique/Debate, Single Position), Comparative Passages. Don't rush.</div></div></div>
+          <div class="loop-block"><div class="block-icon">📙</div><div class="block-body"><div class="block-top"><span class="block-title">Loophole — Weekly Chapter Review</span><span class="block-time">Next 1 hr</span></div><div class="block-detail">Re-read the week's Loophole chapter — specifically sections flagged from your error log. Saturday is when Loophole consolidation happens. Re-do any drills you struggled with mid-week. <strong>Wk 6:</strong> Ch. 11 (MBT, RRE, MoR, Flaw). <strong>Wk 7:</strong> Finish Ch. 12 — full strategy integration, Hyper-Skipping, pacing.</div></div></div>
+          <div class="block"><div class="block-icon">🎯</div><div class="block-body"><div class="block-top"><span class="block-title">Error Log — Blind Re-Do</span><span class="block-time">Last 1 hr</span></div><div class="block-detail">Pull 6–8 questions from this week's error log. Re-do them without notes. Still missing them? That's your #1 concept for next week. Still getting them right? Retire them from active review.</div></div></div>
+        </div>
+      </div>
+      <div class="section chess">
+        <div class="section-header">
+          <div><div class="section-title">♟️ Chess</div><span class="badge">Strategy + Puzzles</span></div>
+          <div class="duration">1 hr · afternoon</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">🎥</div><div class="block-body"><div class="block-top"><span class="block-title">Strategy Concept Video</span><span class="block-time">0–20 min</span></div><div class="block-detail">One YouTube video on long-term chess thinking: pawn structure, weak squares, piece activity, imbalances. GothamChess "How to Get Good" series or Naroditsky Speed Run (beginner episodes) — both excellent for your specific gap of long-term strategy.</div></div></div>
+          <div class="block"><div class="block-icon">♟️</div><div class="block-body"><div class="block-top"><span class="block-title">Chess.com Puzzles</span><span class="block-time">20–40 min</span></div><div class="block-detail">15–20 puzzles. Say your move aloud before clicking — forces calculation over instinct.</div></div></div>
+          <div class="block"><div class="block-icon">🎮</div><div class="block-body"><div class="block-top"><span class="block-title">Play + Analyze</span><span class="block-time">40–60 min</span></div><div class="block-detail">1–2 games at 15+10. No blitz. After each, find your biggest mistake using Chess.com analysis — before checking the engine. Articulate why it was a mistake in your own words.</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phase-content" data-phase="2">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — Practice</div><span class="badge">7Sage Rest Day / Optional Catch-Up</span></div>
+          <div class="duration">Per 7Sage · Day 6 = Rest</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">😴</div><div class="block-body"><div class="block-top"><span class="block-title">Rest Day (per 7Sage)</span><span class="block-time">Day 6 of each block</span></div><div class="block-detail">7Sage marks Day 6 as rest with optional catch-up. Honor this. PT performance genuinely improves with rest. Only use the catch-up block if you fell behind Mon–Fri.</div></div></div>
+          <div class="loop-block"><div class="block-icon">📙</div><div class="block-body"><div class="block-top"><span class="block-title">Loophole — Now a Reference Document</span><span class="block-time">Optional · 30 min max</span></div><div class="block-detail">Ch. 12 should be complete by the time you enter Phase 2. From here, use the Loophole as a reference only — when your error log flags a flaw type or conditional pattern, re-read that chapter section. Don't read new chapters during Phase 2.</div></div></div>
+        </div>
+        <div class="sage-note"><strong>Phase 2 Saturday rule:</strong> No new drill sets on rest day. Error log re-read only if you choose to study. Let the week's work settle before Sunday's PT.</div>
+      </div>
+      <div class="section chess">
+        <div class="section-header">
+          <div><div class="section-title">♟️ Chess</div><span class="badge">Strategy + Puzzles</span></div>
+          <div class="duration">1 hr · afternoon</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">🎥</div><div class="block-body"><div class="block-top"><span class="block-title">Strategy Video + Puzzles + Game</span><span class="block-time">0–60 min</span></div><div class="block-detail">20 min strategy video → 20 min puzzles (say moves aloud) → 20 min 1 game at 15+10 with post-game analysis. Find your own biggest mistake before the engine.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= SUNDAY ======= -->
+  <div id="sun" class="day-panel">
+    <div class="phase-content active" data-phase="1">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — Foundations</div><span class="badge">7Sage Sunday + Deep Error Work</span></div>
+          <div class="duration">4 hrs · morning</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📺</div><div class="block-body"><div class="block-top"><span class="block-title">7Sage Sunday Lessons</span><span class="block-time">First 2 hrs</span></div><div class="block-detail">Complete Sunday's assigned content. Sundays in Wks 3–6 include heavy work: PSA questions, Flaw deep dives, Parallel, RC passage mastery, Comparative Passages. Take your time on all of it.</div></div></div>
+          <div class="block"><div class="block-icon">🎯</div><div class="block-body"><div class="block-top"><span class="block-title">Error Log — Blind Re-Do</span><span class="block-time">Next 1.5 hrs</span></div><div class="block-detail">Every flagged item from the week's log, re-done blind. Still missing them? Re-watch 7Sage + re-read the relevant Loophole section back to back. These recurring misses are the key to your score jump.</div></div></div>
+          <div class="loop-block"><div class="block-icon">📙</div><div class="block-body"><div class="block-top"><span class="block-title">Loophole — Preview Next Chapter</span><span class="block-time">Last 30 min</span></div><div class="block-detail">Read the opening sections of next week's Loophole chapter. Priming with Cassidy's framework before 7Sage teaches the same topic creates a powerful recognition effect — you'll spot the concept in 7Sage lessons immediately.</div></div></div>
+        </div>
+      </div>
+      <div class="section chess">
+        <div class="section-header">
+          <div><div class="section-title">♟️ Chess</div><span class="badge">Openings + Deep Game Analysis</span></div>
+          <div class="duration">1 hr · afternoon</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📚</div><div class="block-body"><div class="block-top"><span class="block-title">Opening Study</span><span class="block-time">0–20 min</span></div><div class="block-detail">Commit to ONE opening each side for months: <strong>London System</strong> (white) and <strong>Caro-Kann</strong> (black). Both are strategically rich, beginner-friendly, and built on long-term positional ideas — perfect for your specific gap. Study the ideas behind each move, not memorized lines.</div></div></div>
+          <div class="block"><div class="block-icon">🎮</div><div class="block-body"><div class="block-top"><span class="block-title">1 Slow Game + Deep Analysis</span><span class="block-time">20–60 min</span></div><div class="block-detail">One 15+10 or 30-min game. Spend as long analyzing it as you did playing. Ask: where did the position shift? What was the critical moment? Find your own mistakes before the engine. One well-analyzed game beats five unreviewed ones every time.</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phase-content" data-phase="2">
+      <div class="section lsat">
+        <div class="section-header">
+          <div><div class="section-title">⚖️ LSAT — Practice</div><span class="badge">Full PrepTest Day — Every Sunday</span></div>
+          <div class="duration">4 hrs · morning</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📋</div><div class="block-body"><div class="block-top"><span class="block-title">Full Timed PrepTest</span><span class="block-time">Morning · ~3 hrs</span></div><div class="block-detail">Every Sunday in Phase 2 is PT day. Full test, real conditions — no phone, timer running, single sitting. This rehearsal is what makes August feel familiar instead of terrifying.</div></div></div>
+          <div class="block"><div class="block-icon">🔍</div><div class="block-body"><div class="block-top"><span class="block-title">Full PT Review</span><span class="block-time">After PT · 1 hr</span></div><div class="block-detail">Review every miss with 7Sage explanations. Add to error log. For any flaw/conditional pattern miss: open Loophole to the relevant chapter and re-read that section. PT review is non-negotiable — this is where the score actually moves.</div></div></div>
+          <div class="block"><div class="block-icon">📈</div><div class="block-body"><div class="block-top"><span class="block-title">Score Trend Log</span><span class="block-time">10 min</span></div><div class="block-detail">Record score, section breakdown, and top error patterns. Track weekly. Target: 165+ by June, 170+ by late July. If you plateau 2+ weeks, shift drill focus — don't just add hours.</div></div></div>
+        </div>
+        <div class="sage-note"><strong>PT pacing targets:</strong> ~+3–5 pts/month with disciplined error log + Loophole reference work. Apr: 158–160. May: 162–165. Jun: 166–168. Jul: 170+. Aug: 172+.</div>
+      </div>
+      <div class="section chess">
+        <div class="section-header">
+          <div><div class="section-title">♟️ Chess</div><span class="badge">Openings + Deep Analysis</span></div>
+          <div class="duration">1 hr · afternoon</div>
+        </div>
+        <div class="blocks">
+          <div class="block"><div class="block-icon">📚</div><div class="block-body"><div class="block-top"><span class="block-title">Opening Review + 1 Slow Game</span><span class="block-time">0–60 min</span></div><div class="block-detail">10 min opening line review → 1 slow game (15+10 or 30 min) → full post-game analysis. Find your own biggest mistake before consulting the engine. One question to always ask: "What was I thinking about vs. what should I have been thinking about?"</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Milestone Timeline -->
+  <div class="milestone-bar">
+    <div class="section-label">Road to August 2026</div>
+    <div class="milestones">
+      <div class="milestone"><div class="m-dot m-now"></div><div class="m-text"><strong>Now (Wk 2):</strong> 7Sage Foundations · Loophole Ch. 6 in progress · LR quantifiers + sets</div></div>
+      <div class="m-line"></div>
+      <div class="milestone"><div class="m-dot m-loop"></div><div class="m-text"><strong>Wks 2–7 (now → ~Apr 5):</strong> Complete Loophole Ch. 6→12 at ~1 chapter/week alongside 7Sage · Finish all LR core curriculum + full RC curriculum</div></div>
+      <div class="m-line"></div>
+      <div class="milestone"><div class="m-dot m-phase2"></div><div class="m-text"><strong>Apr 6 — Jul 30 (14 weeks):</strong> Phase 2 · 7Sage Practice Blocks · weekly PTs every Sunday · Loophole used as reference only · target 165+ by June</div></div>
+      <div class="m-line"></div>
+      <div class="milestone"><div class="m-dot m-pt"></div><div class="m-text"><strong>Late July:</strong> Taper — reduce new drills, consolidate error log, PT review only · target 170+ by Jul 20</div></div>
+      <div class="m-line"></div>
+      <div class="milestone"><div class="m-dot m-test"></div><div class="m-text"><strong>August 2026:</strong> Test day · 172+ · 5 months of structured daily work</div></div>
+    </div>
+  </div>
+
+  <!-- Rhythm -->
+  <div class="rhythm-card">
+    <div class="section-label">Weekly Rhythm</div>
+    <div class="rhythm-grid">
+      <div class="rhythm-day"><div class="r-label">Mon</div><div class="r-pills"><div class="r-pill pill-lsat">LSAT</div><div class="r-pill pill-loop">Loop</div><div class="r-pill pill-es">ES</div></div></div>
+      <div class="rhythm-day"><div class="r-label">Tue</div><div class="r-pills"><div class="r-pill pill-lsat">LSAT</div><div class="r-pill pill-loop">Loop</div><div class="r-pill pill-es">ES</div></div></div>
+      <div class="rhythm-day"><div class="r-label">Wed</div><div class="r-pills"><div class="r-pill pill-lsat">LSAT</div><div class="r-pill pill-loop">Loop</div><div class="r-pill pill-it">IT</div></div></div>
+      <div class="rhythm-day"><div class="r-label">Thu</div><div class="r-pills"><div class="r-pill pill-lsat">LSAT</div><div class="r-pill pill-loop">Loop</div><div class="r-pill pill-it">IT</div></div></div>
+      <div class="rhythm-day"><div class="r-label">Fri</div><div class="r-pills"><div class="r-pill pill-lsat">LSAT</div><div class="r-pill pill-loop">Loop</div><div class="r-pill pill-es">ES</div></div></div>
+      <div class="rhythm-day"><div class="r-label">Sat</div><div class="r-pills"><div class="r-pill pill-lsat">LSAT*</div><div class="r-pill pill-loop">Loop</div><div class="r-pill pill-chess">Chess</div></div></div>
+      <div class="rhythm-day"><div class="r-label">Sun</div><div class="r-pills"><div class="r-pill pill-lsat">LSAT</div><div class="r-pill pill-loop">Loop↑</div><div class="r-pill pill-chess">Chess</div></div></div>
+    </div>
+    <p class="rhythm-note">Loop = 30 min Loophole reading daily (Phase 1 only). Loop↑ = preview next chapter. *Phase 2 Sat = rest day. Phase 2 Sun = full PT. Loophole becomes reference-only in Phase 2.</p>
+  </div>
+
+  <!-- Tips -->
+  <div class="tips-card">
+    <div class="section-label">Key Principles</div>
+    <div class="tips-grid">
+      <div>
+        <div class="tip-group-label">⚖️ LSAT + Loophole</div>
+        <div class="tip"><div class="tip-icon">📙</div><div class="tip-text">1 Loophole chapter per week, Ch. 6→12. Finish by Apr 5 — then it's a reference, not reading material.</div></div>
+        <div class="tip"><div class="tip-icon">🔗</div><div class="tip-text">Read Loophole chapters 3–5 days before 7Sage covers the same topic. The preview creates a recognition effect that accelerates learning.</div></div>
+        <div class="tip"><div class="tip-icon">📓</div><div class="tip-text">Error log is everything. When a miss ties to a Loophole flaw type, note the chapter. Re-read it that Saturday.</div></div>
+        <div class="tip"><div class="tip-icon">📈</div><div class="tip-text">Targets: Apr 158–160 · May 162–165 · Jun 166–168 · Jul 170+ · Aug 172+. Plateau 2+ wks? Shift drill focus, not hours.</div></div>
+      </div>
+      <div>
+        <div class="tip-group-label">♟️ Chess</div>
+        <div class="tip"><div class="tip-icon">🐢</div><div class="tip-text">No blitz or bullet — ever. 15+10 only. Fast chess builds guessing habits, not strategy.</div></div>
+        <div class="tip"><div class="tip-icon">🔍</div><div class="tip-text">One analyzed game beats ten unreviewed ones. Always find your own mistakes before the engine.</div></div>
+        <div class="tip-group-label" style="margin-top:10px">🌍 Languages</div>
+        <div class="tip"><div class="tip-icon">🎙️</div><div class="tip-text">Reading aloud is speaking practice. Don't skip it just because nobody is listening.</div></div>
+        <div class="tip"><div class="tip-icon">🧠</div><div class="tip-text">At A1/A2, comprehensible input (Lingopie, graded readers) is your fastest path. Output solidifies what input teaches.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentPhase = 1;
+  const days = ['mon','tue','wed','thu','fri','sat','sun'];
+  const tabs = document.querySelectorAll('.tab');
+
+  const loopData = {
+    1:  { title: 'Ch. 1 — LR Translations', text: 'Done. The Translation method: put every stimulus in your own words before engaging with answer choices. This is the foundation everything else builds on.', link: 'Pre-Wk 2 — foundational skill, active in every question' },
+    2:  { title: 'Ch. 2 — Invalid vs. Valid Conclusions, How to Attack an Argument', text: 'Done. Invalid arguments (most LSAT args) are vulnerable to "What if...?" loopholes. Valid arguments/inferences are not. This distinction governs everything.', link: 'Active in all question types throughout curriculum' },
+    3:  { title: 'Ch. 3 — Certainty vs. Possibility, Truthiness Indicators', text: 'Done. Certainty conclusions need certainty premises. Possibility premises can\'t prove certainty conclusions (usually). This underpins MBT, SA, and NA questions.', link: 'Wk 3: MBT and Must Be True questions — directly reinforced' },
+    4:  { title: 'Ch. 4 — Conditional Logic: Sufficient & Necessary Conditions', text: 'Done. "If A then B" — A is sufficient, B is necessary. The directional arrow. If/then indicators. This is the bedrock of SA and NA questions.', link: 'Wks 3–4: SA and NA questions — Ch. 4 is their foundation' },
+    5:  { title: 'Ch. 5 — Contrapositives & Negation', text: 'Done. Contrapositive: flip and negate both sides. NOT B → NOT A. Negation rules for and/or. The negation test for NA questions comes directly from this chapter.', link: 'Wk 4: NA questions — the negation test uses Ch. 5 directly' },
+    6:  { title: 'Ch. 6 — Either/Or, Unless/Until/Except, Complex Conditional Chains', text: 'You\'re here now. This chapter extends conditional logic into the trickier indicator words the LSAT hides in plain sight. "Unless" = "if not." "Only if" flips sufficient/necessary. "Neither/nor" creates a double negation. Master these translations cold — they appear constantly in SA, NA, Flaw, and Weaken question stems and stimuli.', link: '🔗 7Sage alignment: Wk 2 (Sets/Quantifiers) → Wk 3–4 (SA, NA) — Ch. 6 directly primes your conditional reasoning for these' },
+    7:  { title: 'Ch. 7 — Classic Flaws (False Dichotomy, Straw Man, Circular Reasoning, Equivocation, Appeal Fallacies, Irrelevant)', text: 'Read this in Wk 3 or early Wk 4 — before 7Sage\'s Flaw lessons. The 16 classic LSAT flaws Cassidy names here map directly to 7Sage\'s Flaw question type. You\'ll recognize each flaw by name when 7Sage shows it in a YOU TRY question.', link: '🔗 7Sage alignment: Wk 4–5 Flaw lessons — read Ch. 7 first for maximum recognition' },
+    8:  { title: 'Ch. 8 — Causal Reasoning Flaws (Correlation ≠ Causation, Biased Samples, Survey Problems, Comparison Group Errors)', text: 'Read this the same week 7Sage covers WSE Causal (Wk 3). Cassidy\'s "What if" questions (biased sample? reverse causation? confounding variable?) are the exact alternative hypotheses 7Sage drills. Dual reinforcement at its best.', link: '🔗 7Sage alignment: Wk 3–4 WSE Causal — the most directly aligned chapter in the book' },
+    9:  { title: 'Ch. 9 — CLIR Method, Powerful vs. Provable Spectrum, Stimulus-Type Identification', text: 'The CLIR method: Classify stimulus → Locate loophole/inference → Identify question type → Respond. Once automatic, this framework doubles your prediction speed. The Powerful-Provable spectrum simplifies answer choice evaluation dramatically. Read carefully and re-do all drills.', link: '🔗 7Sage alignment: Wk 3–5 spans all question types — Ch. 9 is the meta-framework that ties them together' },
+    10: { title: 'Ch. 10 — Question Types: Weaken, Strengthen, Necessary Assumption, Sufficient Assumption', text: 'Read during Wk 4 when 7Sage is deep in SA and NA. Cassidy\'s approach to these question types from a Powerful-Provable lens complements 7Sage\'s more structural approach perfectly — they teach the same skill from different angles.', link: '🔗 7Sage alignment: Wk 3–4 WSE and SA/NA blocks — read Ch. 10 that same week' },
+    11: { title: 'Ch. 11 — Question Types: Must Be True, Resolve/Reconcile, Method of Reasoning, Flaw', text: 'Read in Wk 5 when 7Sage covers the back half of LR question types (MoR, Flaw heavy days). By now you\'re seeing all these question types in YOU TRY questions — Ch. 11 gives you Cassidy\'s lens on each one for comparison and reinforcement.', link: '🔗 7Sage alignment: Wk 5 Flaw lessons, MoR — Ch. 11 is a direct companion' },
+    12: { title: 'Ch. 12 — Full Strategy Integration: Hyper-Skipping, Pacing, Section Management', text: 'Finish this by Apr 5 — the start of Phase 2. Ch. 12 is your tactical section management guide: when to skip, how to use your remaining time, how to approach the section as a whole. This knowledge is what makes the Phase 2 timed practice actually pay off.', link: '🔗 7Sage alignment: Enter Phase 2 (Apr 6) — Ch. 12 should be done before your first practice block PT' }
+  };
+
+  function showLoop(ch) {
+    const d = loopData[ch];
+    document.getElementById('loopTitle').textContent = d.title;
+    document.getElementById('loopText').textContent = d.text;
+    document.getElementById('loopLink').textContent = d.link;
+    document.querySelectorAll('.loop-ch').forEach((el, i) => {
+      el.style.outline = (i + 1 === ch) ? '2px solid var(--loop-accent)' : 'none';
+    });
+  }
+
+  function showDay(day) {
+    days.forEach((d, i) => {
+      document.getElementById(d).classList.toggle('active', d === day);
+      tabs[i].classList.toggle('active', d === day);
+    });
+  }
+
+  function switchPhase(phase) {
+    currentPhase = phase;
+    document.getElementById('btnPhase1').classList.toggle('active', phase === 1);
+    document.getElementById('btnPhase2').classList.toggle('active', phase === 2);
+    document.getElementById('banner1').style.display = phase === 1 ? 'block' : 'none';
+    document.getElementById('banner2').style.display = phase === 2 ? 'block' : 'none';
+    document.querySelectorAll('.phase-content').forEach(el => {
+      el.classList.toggle('active', parseInt(el.dataset.phase) === phase);
+    });
+  }
+
+  // Initialize loop detail view
+  showLoop(6);
+</script>
+</body>
+</html>
